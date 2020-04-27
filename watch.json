@@ -1,0 +1,21 @@
+{
+  "install": {
+    "include": [
+      "^package\\.json$",
+      "^\\.env$"
+    ]
+  },
+  "restart": {
+    "exclude": [
+      "^client/",
+      "^public/",
+      "^dist/",
+      "\\.vue$"
+    ],
+    "include": [
+      "\\.js$",
+      "\\.json"
+    ]
+  },
+  "throttle": 10000
+}

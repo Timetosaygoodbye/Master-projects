@@ -1,0 +1,286 @@
+info:
+  version: 1.0.0
+  title: OWL API
+servers:
+  - url: "https://owl-project.glitch.me:3000/api"
+paths:
+  /login:
+    post:
+      summary: "Login and get token"
+      operationId: login
+      parameters:
+        - name: username
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Wrong username or password
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /guest:
+    get:
+      summary: "Get guest token"
+      operationId: getGuestToken
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+      default:
+        description: Unexpected error
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Error"
+  /signup:
+    post:
+      summary: "Create new user and login"
+      operationId: signUp
+      parameters:
+        - name: username
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: email
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Username exists
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /user/:userId:
+    post:
+      summary: "Update user info"
+      operationId: updateUserInfo
+      parameters:
+        - name: token
+          in: head
+          required: true
+          schema:
+            type: string
+        - oneOf:
+            - name: username
+              in: query
+              required: true
+              schema:
+                type: string
+            - name: password
+              in: query
+              required: true
+              schema:
+                type: string
+            - name: name
+              in: query
+              schema:
+                type: string
+            - name: email
+              in: query
+              required: true
+              schema:
+                type: string
+      responses:
+        "200":
+          description: Success
+        "403":
+          description: Unauthorized
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /schedule:
+    get:
+      summary: "Get schedule"
+      operationId: getSchedule
+      parameters:
+        - name: token
+          in: head
+          required: true
+        - name: teamId
+          description: "0 for all teams"
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: season
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: stage
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: week
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Match"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /standing:
+    get:
+      summary: "Get standing"
+      operationId: getStanding
+      parameters:
+        - name: token
+          in: head
+          required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TeamRank"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /stat:
+    get:
+      summary: "Get player stat"
+      operationId: getPlayerStat
+      parameters:
+        - name: token
+          in: head
+          required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PlayerStat"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - userId
+        - username
+        - token
+        - usergroup
+        - name
+        - email
+        - createdDate
+      properties:
+        userId: integer
+        username: string
+        token: string
+        usergroup: integer
+        name: string
+        email: string
+        createdDate: string
+    Match:
+      type: object
+      properties:
+        matchId: integer
+        date: string
+        weekday: string
+        team1: string
+        team1abbr: string
+        team1logo: string
+        team1score: integer
+        team2: string
+        team2abbr: string
+        team2logo: string
+        team2score: integer
+    TeamRank:
+      type: object
+      properties:
+        teamId: integer
+        logoUrl: string
+        ranking: integer
+        conf: string
+        div: string
+        win: integer
+        lose: integer
+        mp: integer
+        wlt: string
+        diff: string
+    PlayerStat:
+      type: object
+      properties:
+        playerId: integer
+        playerName: string
+        role: string
+        team: string
+        elim: float
+        death: float
+        damage: integer
+        healing: integer
+        timePlayed: string
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
